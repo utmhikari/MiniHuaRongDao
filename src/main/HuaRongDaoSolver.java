@@ -14,10 +14,25 @@ import java.util.*;
  */
 public class HuaRongDaoSolver {
 
-    private static HashSet<Integer> statusSet = new HashSet<>();  // 终极保险，存储地图状态的编码
-    private static HashMap<Integer, ArrayList<String>> charNameMap = new HashMap<>();  // 按大小分组的角色图（有序，编码用）
-    private static HashMap<Integer, ArrayList<String>> moveMap = new HashMap<>();  // 存储所有移动情况
+    // 终极保险，存储地图状态的编码
+    private static HashSet<Integer> statusSet = new HashSet<>();
+    // 按大小分组的角色图（有序，编码用）
+    private static HashMap<Integer, ArrayList<String>> charNameMap = new HashMap<>();
+    // 存储所有移动情况
+    private static HashMap<Integer, ArrayList<String>> moveMap = new HashMap<>();
+    // 质数
     private static int[] prime = {11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97};
+    // 最大步数（默认200）
+    private static int maxStep = 200;
+
+    /**
+     * 清空数据
+     */
+    private static void clearData() {
+        if(!statusSet.isEmpty()) { statusSet.clear(); }
+        if(!charNameMap.isEmpty()) { charNameMap.clear(); }
+        if(!moveMap.isEmpty()) { moveMap.clear(); }
+    }
 
     /**
      * 华容道谜题解谜
@@ -30,15 +45,7 @@ public class HuaRongDaoSolver {
             return;
         }
         // 清空状态集合、按大小分组的角色图以及移动情况
-        if(!statusSet.isEmpty()) {
-            statusSet.clear();
-        }
-        if(!charNameMap.isEmpty()) {
-            charNameMap.clear();
-        }
-        if(!moveMap.isEmpty()) {
-            moveMap.clear();
-        }
+        clearData();
         long start = System.currentTimeMillis();
         if(solve(puzzle.getCharacter())) {
             long end = System.currentTimeMillis();
@@ -79,11 +86,16 @@ public class HuaRongDaoSolver {
                charNameMap.get(size).add(charName);
            }
         });
-        LinkedList<HashMap<String, int[]>> charMapList = new LinkedList<>();  // 角色图列表
-        charMapList.addLast(charMap);  // 添加至角色图
-        int stepCount = 0;  // 步数统计
-        statusSet.add(encodeCharMap(charMap, false));  // 添加角色图编码
-        statusSet.add(encodeCharMap(charMap, true));  // 添加角色图编码（镜像）
+        // 角色图列表
+        LinkedList<HashMap<String, int[]>> charMapList = new LinkedList<>();
+        // 添加至角色图
+        charMapList.addLast(charMap);
+        // 步数统计
+        int stepCount = 0;
+        // 添加角色图编码
+        statusSet.add(encodeCharMap(charMap, false));
+        // 添加角色图编码（镜像）
+        statusSet.add(encodeCharMap(charMap, true));
         return solve(charMapList, stepCount, mainCharacter);
     }
 
@@ -94,16 +106,14 @@ public class HuaRongDaoSolver {
      * @param mainCharacter 主角名称
      */
     private static boolean solve(LinkedList<HashMap<String, int[]>> charMapList, int stepCount, String mainCharacter) {
-        // 输出当前状态情况
-        // System.out.println("StepCount: " + stepCount + ", ListSize: " + charMapList.size() + ", StatusSetSize: " + statusSet.size());
-        // 如果角色图列表为空或者统计步数大于200则无解
-        if (charMapList.isEmpty() || stepCount > 200) {
+        // 如果角色图列表为空或者统计步数大于最大步数则无解
+        if (charMapList.isEmpty() || stepCount > maxStep) {
             System.out.println("\nCannot be solved!");
             return false;
         }
         // 首先判断主角是否已经到达终点
-        Iterator<HashMap<String, int[]>> iter = charMapList.iterator();  // 链表迭代器
-        int iterCount = 0; // 迭代器遍历计数
+        Iterator<HashMap<String, int[]>> iter = charMapList.iterator();
+        int iterCount = 0;
         while(iter.hasNext()) {
             HashMap<String, int[]> charMap = iter.next();
             int[] mainCharacterProperty = charMap.get(mainCharacter);
@@ -122,10 +132,7 @@ public class HuaRongDaoSolver {
                     nextIndex = Integer.parseInt(moveStrSplit[1]);
                 }
                 HashMap<String, String> dirMap = new HashMap<String, String>() {{
-                    put("u", "上");
-                    put("d", "下");
-                    put("l", "左");
-                    put("r", "右");
+                    put("u", "上"); put("d", "下"); put("l", "左"); put("r", "右");
                 }};
                 int step = 1;
                 for(int i = 1; i <= reverseMoves.size(); i++) {
@@ -136,9 +143,7 @@ public class HuaRongDaoSolver {
                     moveOutput.append("向");
                     moveOutput.append(dirMap.get(moveCharDir[1]));
                     moveOutput.append("\t");
-                    if(i % 10 == 0) {
-                        moveOutput.append("\n");
-                    }
+                    if(i % 10 == 0) { moveOutput.append("\n"); }
                 }
                 System.out.println(moveOutput.toString());
                 return true;
@@ -146,14 +151,18 @@ public class HuaRongDaoSolver {
             iterCount++;
         }
         // 如果主角未到达终点，则进行后续解谜步骤
-        iter = charMapList.iterator();  // 重新初始化迭代器
-        iterCount = 0;  // 重新初始化迭代器计数
-        LinkedList<HashMap<String, int[]>> newCharMapList = new LinkedList<>();  // 新角色图列表
+        iter = charMapList.iterator();
+        iterCount = 0;
+        // 新角色图列表
+        LinkedList<HashMap<String, int[]>> newCharMapList = new LinkedList<>();
         // 如果没解完，访问原角色图
         while (iter.hasNext()) {
-            HashMap<String, int[]> charMap = iter.next();  // 读取角色表
-            HashSet<Integer> blankSet = getBlankSet(charMap);  // 读取空白位置集合
-            ArrayList<Integer> posList = new ArrayList<>(); // 角色移动占据位置列表
+            // 读取角色表
+            HashMap<String, int[]> charMap = iter.next();
+            // 读取空白位置集合
+            HashSet<Integer> blankSet = getBlankSet(charMap);
+            // 角色移动占据位置列表
+            ArrayList<Integer> posList = new ArrayList<>();
             final int itc = iterCount;
             // 遍历角色表，移动角色，为列表添加新的角色图
             charMap.forEach((charName, property)->{
@@ -164,8 +173,9 @@ public class HuaRongDaoSolver {
             });
             iterCount++;  // 迭代器计数+1
         }
-        charMapList.clear();  // 删除当前角色图
-        charMapList = newCharMapList;  // 更新角色图
+        charMapList.clear();
+        // 更新角色图
+        charMapList = newCharMapList;
         // 返回后续的角色图解谜结果
         return solve(charMapList, stepCount + 1, mainCharacter);
     }
@@ -306,11 +316,9 @@ public class HuaRongDaoSolver {
      * @return 编码
      */
     private static int encodeCharMap(HashMap<String, int[]> charMap, boolean isMirror) {
-        int code = 0;
-        int index = 0;
+        int code = 0, index = 0;
         for(Map.Entry<Integer, ArrayList<String>> entry : charNameMap.entrySet()) {
-            int groupLen = 0;
-            int tmpCode = 0;
+            int groupLen = 0, tmpCode = 0;
             for(String charName : entry.getValue()) {
                 int x = isMirror ? 4 - charMap.get(charName)[2] - charMap.get(charName)[0] : charMap.get(charName)[2];
                 int y = charMap.get(charName)[3];
@@ -329,36 +337,20 @@ public class HuaRongDaoSolver {
      */
     public static void main(String args[]) {
 
-        HashMap<String, int[]> charMap_YTWJ = new HashMap<String, int[]>() {{
-            put("曹操", new int[]{2, 2, 0, 1});
-            put("关羽", new int[]{2, 1, 0, 3});
-            put("张飞", new int[]{1, 2, 2, 1});
-            put("赵云", new int[]{1, 2, 3, 1});
-            put("黄忠", new int[]{1, 2, 2, 3});
-            put("马超", new int[]{2, 1, 0, 4});
-            put("兵1", new int[]{1, 1, 1, 0});
-            put("兵2", new int[]{1, 1, 2, 0});
-            put("兵3", new int[]{1, 1, 3, 0});
-            put("兵4", new int[]{1, 1, 3, 3});
-        }};
-        HuaRongDaoCharacter character_YTWJ = new HuaRongDaoCharacter(charMap_YTWJ);
-        HuaRongDaoPuzzle puzzle_YTWJ= new HuaRongDaoPuzzle("以退为进", character_YTWJ);
-        HuaRongDaoSolver.solve(puzzle_YTWJ);
-
-        HashMap<String, int[]> charMap_HDLM = new HashMap<String, int[]>() {{
+        HashMap<String, int[]> charMap = new HashMap<String, int[]>() {{
             put("曹操", new int[]{2, 2, 1, 0});
             put("关羽", new int[]{2, 1, 1, 2});
             put("张飞", new int[]{1, 2, 0, 0});
             put("赵云", new int[]{1, 2, 3, 0});
-            put("马超", new int[]{1, 2, 3, 2});
             put("黄忠", new int[]{1, 2, 0, 2});
+            put("马超", new int[]{2, 1, 1, 3});
             put("兵1", new int[]{1, 1, 0, 4});
-            put("兵2", new int[]{1, 1, 1, 3});
-            put("兵3", new int[]{1, 1, 2, 3});
+            put("兵2", new int[]{1, 1, 3, 2});
+            put("兵3", new int[]{1, 1, 3, 3});
             put("兵4", new int[]{1, 1, 3, 4});
         }};
-        HuaRongDaoCharacter character_HDLM = new HuaRongDaoCharacter(charMap_HDLM);
-        HuaRongDaoPuzzle puzzle_HDLM = new HuaRongDaoPuzzle("横刀立马", character_HDLM);
-        HuaRongDaoSolver.solve(puzzle_HDLM);
+        HuaRongDaoCharacter character = new HuaRongDaoCharacter(charMap);
+        HuaRongDaoPuzzle puzzle= new HuaRongDaoPuzzle("云遮雾障", character);
+        HuaRongDaoSolver.solve(puzzle);
     }
 }

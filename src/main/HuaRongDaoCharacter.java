@@ -55,10 +55,10 @@ public class HuaRongDaoCharacter {
      * @param newProperty 新角色属性（长度为4，分别为Length（长度）、Height（高度）、X（左上角0起）、Y（左上角0起））
      */
     public void setCharacter(String charName, int[] newProperty) {
-        if(charName.equals(mainCharacter)) {
+        if (charName.equals(mainCharacter)) {
             System.out.println("The properties of main character cannot be modified!");
         }
-        if(newProperty.length == 4) {
+        if (newProperty.length == 4) {
             if (charMap.containsKey(charName)) {
                 int[] oriProperty = charMap.get(charName);
                 outputCharacterProperty(charName, oriProperty);
@@ -83,13 +83,9 @@ public class HuaRongDaoCharacter {
             int[] property = entry.getValue();
             for(int i = 0; i < property[0]; i++) {
                 for(int j = 0; j < property[1]; j++) {
-                    int x = property[2]+i;
-                    int y = property[3]+j;
-                    if(x < 0 || x > 3 || y < 0 || y > 4 || gameArena[x][y]) {
-                        return false;
-                    } else {
-                        gameArena[x][y] = true;
-                    }
+                    int x = property[2] + i, y = property[3] + j;
+                    if(x < 0 || x > 3 || y < 0 || y > 4 || gameArena[x][y]) { return false; }
+                    else { gameArena[x][y] = true; }
                 }
             }
         }

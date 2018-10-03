@@ -21,7 +21,6 @@ public class HuaRongDaoPuzzle {
         this.description = "";
         character = new HuaRongDaoCharacter();
         isSet = false;
-
     }
 
     /**
@@ -32,10 +31,8 @@ public class HuaRongDaoPuzzle {
     public HuaRongDaoPuzzle(String name, HuaRongDaoCharacter character) {
         this.name = name;
         this.description = "";
-        if(character.isValid()) {
-            this.character = character;
-            isSet = true;
-        } else {
+        if(character.isValid()) { this.character = character; isSet = true; }
+        else {
             System.out.println("Error occured in character settings of puzzle: " + name);
             this.character = new HuaRongDaoCharacter();
             isSet = false;
